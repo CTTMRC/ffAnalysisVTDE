@@ -57,27 +57,27 @@ x1_coeff=circshift(coeff_orig,0); %[ 0.5621  -0.5772   0.5924];
 x2_coeff=circshift(coeff_orig,1); %[ 0.5924   0.5621  -0.5772];
 x3_coeff=circshift(coeff_orig,2); %[-0.5772   0.5924   0.5621];
 lin_coeff=[-0.7071,0.7071]; %Norm==1
-int_coeff=[-0.7070,0.7070,-0.0116,-0.0107,0.0113];%Norm==1
+int_coeff=[-0.2300    0.2300   -0.7146   -0.4732    0.3995];%Norm==1
 safe_n=n+safety_tail;
 kernel_coeff=((1:safe_n).^2.*sin((1:safe_n).^2))./(1+(1:safe_n).*cos((1:safe_n)));
 kernel_coeff=kernel_coeff/norm(kernel_coeff);
 sigma_kernel=37/23;
 gamma_kernel=1/(2*(sigma_kernel)^2);
 %%%%%%%%%%%%%%%%%%%%%%%%%%MODELS%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-linear=@(X)X(:,1)*lin_coeff(1)...
-    +X(:,2)*lin_coeff(2);
-interactions=@(X)X(:,1)*int_coeff(1)...
+linear=@(X)normalize(X(:,1)*lin_coeff(1)...
+    +X(:,2)*lin_coeff(2),'medianiqr');
+interactions=@(X)normalize(X(:,1)*int_coeff(1)...
     +X(:,2)*int_coeff(2)...
     +X(:,1).^2*int_coeff(3)...
     +X(:,2).^2*int_coeff(4)...
-    +X(:,1).*X(:,2)*int_coeff(5);
-nonLinear=@(X)sign((X(:,1))*lin_coeff(1)).*log2(abs(X(:,1)*lin_coeff(1)))...
-    +sign((X(:,2))*lin_coeff(2)).*nthroot(abs(X(:,2)*lin_coeff(2)),3);
-kernel=@(X)X*kernel_coeff';
-exponential=@(X)exp(nthroot(X(:,1)*lin_coeff(1),3)...
-    +nthroot(X(:,2)*lin_coeff(2),3));
-powerRatio=@(X)power((X(:,2)*lin_coeff(2))-14,2)...
-./(1+power((X(:,1).*lin_coeff(1))+7,2));
+    +X(:,1).*X(:,2)*int_coeff(5),'medianiqr');
+nonLinear=@(X)normalize(sign((X(:,1))*lin_coeff(1)).*log2(abs(X(:,1)*lin_coeff(1)))...
+    +sign((X(:,2))*lin_coeff(2)).*nthroot(abs(X(:,2)*lin_coeff(2)),3),'medianiqr');
+kernel=@(X)normalize(X*kernel_coeff','medianiqr');
+exponential=@(X)normalize(exp(nthroot(X(:,1)*lin_coeff(1),5).^2 ...
+    +nthroot(X(:,2)*lin_coeff(2),5).^2));
+powerRatio=@(X)normalize(power(((X(:,2))*lin_coeff(2)),2)...
+./(1+power(((X(:,1)).*lin_coeff(1)),3)),'medianiqr');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 filter_stable = false;
 c1=zeros(t,1);
@@ -139,16 +139,12 @@ base=mvnrnd(zeros(3,1),eye(3),k);
 X1=filter(1,[1;-b1],base(:,1));
 X2=filter(1,[1;-b2],base(:,2));
 X3=filter(1,[1;-b3],base(:,3));
-trend_x1=10*ones(length(X1),1);
-trend_x2=20*ones(length(X1),1);
-trend_x3=2*(linspace(0,2.5*pi,length(X3)))';
-trend_x3=15-median(trend_x3)+trend_x3;
-X1=X1+trend_x1;
-X2=X2+trend_x2;
-X3=X3+trend_x3;
 X1=X1(t_safety+1:end,:);
 X2=X2(t_safety+1:end,:);
 X3=X3(t_safety+1:end,:);
+X1=normalize(X1,'zscore');
+X2=normalize(X2,'zscore');
+X3=normalize(X3,'zscore');
 x=zeros(size(X2,1),9);
 X1_x=X1*x1_coeff;
 X2_x=X2*x2_coeff;
@@ -256,15 +252,15 @@ switch isDynamic
 end
 %%CREATE Y
 D=([X1,X2]);%normalize
-yNoise=NoiseY*randn(size(D(:,1)));
+yNoise=NoiseY*mvnrnd(zeros(6,1),eye(6),size(D,1));
 DD=squareform(pdist(D,'squaredeuclidean'));
 Gauss_kernel=exp(-gamma_kernel*sqrt(DD));
-y_lin=linear(D)+yNoise;
-y_int=interactions(D)+yNoise;
-y_nlin=nonLinear(D)+yNoise;
-y_kernel=kernel(Gauss_kernel)+yNoise;
-y_exp=exponential(D)+yNoise;
-y_enzyme= powerRatio(D)+yNoise;
+y_lin=linear(D)+yNoise(:,1);
+y_int=interactions(D)+yNoise(:,2);
+y_nlin=nonLinear(D)+yNoise(:,3);
+y_kernel=kernel(Gauss_kernel)+yNoise(:,4);
+y_exp=exponential(D)+yNoise(:,5);
+y_enzyme= powerRatio(D)+yNoise(:,6);
 %%CREATE TABLES
 time_idx=datetime('yesterday')+minutes(0:lag:lag*(size(D,1)-1));
 ttX = timetable('Size',[size(D,1),9],'VariableTypes',repmat("double",[1,9]),'RowTimes',time_idx);
