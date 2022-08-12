@@ -1,11 +1,11 @@
-function [ResultsTruthfulness,ResultsR2]=ffAnalysisCORE()
+% function [ResultsTruthfulness,ResultsR2]=ffAnalysisCORE()
 [ExperimentData,LagVect,Delta]=ffAnalysisINIT;
 rng(1)
 % LagVect=[45,40,35,30,25,20,15,10,5];
 ffFactors=fullfact([3,3]);
-sizeFactors=cellstr(["100___","1000__","10000_"]);
-complexityFactors=cellstr(["linear","interactions","power_ratio"]);
-rowNames=cellstr(cat(2,cell2str(sizeFactors(ffFactors(:,1))'),cell2str(complexityFactors(ffFactors(:,2))')));
+sizeFactors=cellstr(["100___","1000__","10000_"])';
+complexityFactors=cellstr(["linear","interactions","power_ratio"])';
+rowNames=strcat(sizeFactors(ffFactors(:,1)),complexityFactors(ffFactors(:,2)));
 methods=cellstr([...
     "P_Correlation",...
     "S_Correlation",...
