@@ -18,7 +18,7 @@ for i=2:length(span)
     for j=1:size(xTemp,2)
         dCorrelationDistance(j)=dCorrnxy(xTemp(:,j),Y);
     end
-[dCorrelationMax(i-1),timeDelayIndex(i-1)]=min(abs(dCorrelationDistance));
+[dCorrelationMax(i-1),timeDelayIndex(i-1)]=max(abs(dCorrelationDistance));
 end
 vtde=(timeDelayIndex-1);
 distance=(vtde-(target-lower))./max_lag;
