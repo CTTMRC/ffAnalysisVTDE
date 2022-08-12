@@ -6,7 +6,7 @@ upper=P.Results.Delta.Upper;
 lower=P.Results.Delta.Lower;
 target=P.Results.Delta.Target;
 maxLag=upper-lower;
-span=[0,cumsum(maxLag)];
+span=[1,cumsum(maxLag)];
 timeDelayIndex=zeros(size(maxLag));
 s0=zeros(size(X));
 sMax=0;
@@ -39,12 +39,12 @@ while flag==0
         s0(:,inclusion)=X(:,j);
         X=X(:,setdiff(1:size(X,2),j));
         
-        inclVAR=find((matInd(j)./(span+1))<=1,1,'first' )-1;
+        inclVAR=find((matInd(j)./span)<=1,1,'first' )-1;
         inclVAR=max(inclVAR,1);
         inclLAG=mod(matInd(j),span(inclVAR));
         
         if inclLAG==0
-            inclLAG=1;
+            inclLAG=maxLag(inclVAR);
         end
         
         matInd=matInd(setdiff(1:size(X,2)+1,j));
@@ -57,7 +57,7 @@ while flag==0
 end
 
 
-vtde=max(timeDelayIndex-1,0);
+vtde=(timeDelayIndex-1);
 distance=(vtde-(target-lower))./maxLag;
 relevantDistance=distance([1:2,4:5,7:8]);
 euclideanDistance=norm([relevantDistance,zeros(size(relevantDistance))]);
