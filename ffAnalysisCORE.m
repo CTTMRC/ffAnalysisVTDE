@@ -65,6 +65,8 @@ for experiment=1:9
     ResultsTruthfulness{experiment,"Procrustes"}=distancePRO;
     [vtdeMiIndex(experiment,:),distanceMIIDX]=ffAnalysisMIINDEX(ttXCalib,yCalib,Delta);
     ResultsTruthfulness{experiment,"MI-Index"}=distanceMIIDX;
+    [vtdeMiSousa(experiment,:),distanceMISOUSA]=ffAnalysisMISOUSA(ttXCalib,yCalib,Delta);
+    ResultsTruthfulness{experiment,"MI-Sousa"}=distanceMISOUSA;
     [vtdeDCorrelation(experiment,:),distanceDCORR]=ffAnalysisDISTANCE(ttXCalib,yCalib,Delta);
     ResultsTruthfulness{experiment,"DistanceCorrelation"}=distanceDCORR;
     

@@ -6,7 +6,7 @@ upper=P.Results.Delta.Upper;
 lower=P.Results.Delta.Lower;
 target=P.Results.Delta.Target;
 maxLag=upper-lower;
-span=[1,cumsum(maxLag)];
+span=[0,cumsum(maxLag)];
 timeDelayIndex=zeros(size(maxLag));
 s0=zeros(size(X));
 sMax=0;
@@ -22,7 +22,7 @@ while flag==0
     
     for i=1:size(X,2)
   
-        MI=MIxnyn([s0(:,sum(s0,1)>0),X(:,i)],Y,2)- MIxnyn(s0(:,sum(s0,1)>0),X(:,i),2);
+        MI=MIxnyn([s0(:,sum(s0,1)>0),X(:,i)],Y,6);%- MIxnyn(s0(:,sum(s0,1)>0),X(:,i),6);
        
         MIxy(:,i)=MI;
         
@@ -39,15 +39,16 @@ while flag==0
         s0(:,inclusion)=X(:,j);
         X=X(:,setdiff(1:size(X,2),j));
         
-        inclVAR=find((matInd(j)./span)<1,1,'first' )-1;
-        inclLAG=mod(matInd(j),maxLag(inclVAR));
+        inclVAR=find((matInd(j)./(span+1))<=1,1,'first' )-1;
+        inclVAR=max(inclVAR,1);
+        inclLAG=mod(matInd(j),span(inclVAR));
         
         if inclLAG==0
-            inclLAG=maxLag(inclVAR);
+            inclLAG=1;
         end
         
         matInd=matInd(setdiff(1:size(X,2)+1,j));
-
+        timeDelayIndex(inclVAR)=inclLAG;
     else
 
         flag=1;
@@ -56,7 +57,7 @@ while flag==0
 end
 
 
-vtde=(timeDelayIndex-1);
+vtde=max(timeDelayIndex-1,0);
 distance=(vtde-(target-lower))./maxLag;
 relevantDistance=distance([1:2,4:5,7:8]);
 euclideanDistance=norm([relevantDistance,zeros(size(relevantDistance))]);
