@@ -1,6 +1,6 @@
 % function [ResultsTruthfulness,ResultsR2]=ffAnalysisCORE()
 [ExperimentData,LagVect,Delta]=ffAnalysisINIT;
-rng(1)
+rng(1,'twister')
 % LagVect=[45,40,35,30,25,20,15,10,5];
 ffFactors=fullfact([3,3]);
 sizeFactors=cellstr(["100___","1000__","10000_"])';
