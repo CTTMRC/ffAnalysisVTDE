@@ -33,6 +33,6 @@ if iscellstr(in)||iscell(in)||isstring(in)
     OK=all(idx);
 else
     in=cellstr(in);
-    OK=all(contain(in,valid));
+    OK=all(contains(in,valid));
 end
 end

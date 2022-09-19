@@ -12,7 +12,7 @@ defaultOptimOptions=struct(...
                 );   
 P=inputParser;
 addOptional(P,'VTRType',"LS",@(x)validCellString(x,expectedType));
-addOptional(P,'Options',defaultOptimOptions,@(x)validStruct(x,defaultOptimOptions));
+addOptional(P,'Options',defaultOptimOptions,@(x)validOptionStructure(x,defaultOptimOptions));
 addRequired(P,'Delta')
 parse(P,Delta,varargin{:});
 Delta=P.Results.Delta;
@@ -39,7 +39,7 @@ if iscellstr(in)||iscell(in)||isstring(in)
     OK=all(idx);
 else
     in=cellstr(in);
-    OK=all(contain(in,valid));
+    OK=all(contains(in,valid));
 end
 end
 function OK=validOptionStructure(in,valid)
